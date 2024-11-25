@@ -41,6 +41,18 @@ pipeline {
             }
         }
 
+        stage("bandit scan") {
+            steps{
+                script {
+                    sh '''
+                    . venv/bin/activate
+                    pip install bandit
+                    bandit -r . -f json -o bandit_report.json || true
+                    '''
+                }
+            }
+        }
+
         stage('Image Build') {
             steps {
                 sh "docker build -t ${IMAGE_NAME} -f ${DOCKERFILE_PATH}/Dockerfile ${DOCKERFILE_PATH}"
