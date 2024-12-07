@@ -1,0 +1,75 @@
+
+pipeline {
+    agent any
+    environment {
+        IMAGE_NAME = "ipl_predictor_app"
+        DOCKERFILE_PATH = "."
+        VENV_PATH = "venv"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/iminsgineark/IPL-Match-Predictor-'
+            }
+        }
+
+        stage('Setup Environment') {
+            parallel {
+                stage('Install Dependencies') {
+                    steps {
+                        sh '''
+                        if ! dpkg -l | grep -q python3.11-venv; then
+                            apt-get update && apt-get install -y python3.11-venv
+                        fi
+                        '''
+                    }
+                }
+                stage('Build Image') {
+                    steps {
+                        sh '''
+                        docker build --cache-from ${IMAGE_NAME}:latest -t ${IMAGE_NAME} -f ${DOCKERFILE_PATH}/Dockerfile ${DOCKERFILE_PATH}
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Prepare Virtual Environment') {
+            steps {
+                sh '''
+                python3 -m venv ${VENV_PATH}
+                . ${VENV_PATH}/bin/activate
+                pip install --cache-dir=.pip_cache -r requirements.txt
+                '''
+            }
+        }
+
+        stage('Static Analysis') {
+            parallel {
+                stage('Bandit Scan') {
+                    steps {
+                        sh '''
+                        . ${VENV_PATH}/bin/activate
+                        pip install bandit
+                        bandit -r src -f json -o bandit_report.json || true
+                        '''
+                    }
+                }
+                stage('Trivy Scan') {
+                    steps {
+                        sh '''
+                        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image ${IMAGE_NAME}:latest --severity HIGH --format json --output trivy_report.json
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                sh "docker run -d -p 8501:8501 ${IMAGE_NAME}"
+            }
+        }
+    }
+}
+
