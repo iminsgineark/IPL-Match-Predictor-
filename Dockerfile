@@ -1,5 +1,8 @@
 FROM python:3.9
 
+LABEL maintainer="Utkrist Ark"
+LABEL description="a dockerfile for ML model"
+
 RUN apt-get update 
 #&& apt-get install -y python3-venv
 
