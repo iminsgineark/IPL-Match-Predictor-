@@ -1,5 +1,8 @@
 FROM python:3.9-slim AS builder
 
+LABEL maintainer="Utkrist Ark"
+LABEL description="a dockerfile for ML model"
+
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
