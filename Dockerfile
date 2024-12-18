@@ -12,6 +12,12 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN useradd -m ark
+
+USER ark
+
+WORKDIR /app
+
 COPY . .
 
 EXPOSE 8501
