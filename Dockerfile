@@ -13,12 +13,10 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
-
-RUN groupadd -g 1001 arkgroup && \
-    useradd -u 1001 -g arkgroup -m ark
-
-RUN chown -R ark:arkgroup /home/ark
+RUN pip install --no-cache-dir -r requirements.txt && \
+    groupadd -g 1001 arkgroup && \
+    useradd -u 1001 -g arkgroup -m ark && \
+    chown -R ark:arkgroup /home/ark
 
 USER ark
 
