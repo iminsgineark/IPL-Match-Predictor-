@@ -21,6 +21,10 @@ COPY . .
 
 FROM python:3.9-slim
 
+RUN useradd -m ark
+
+USER ark
+
 WORKDIR /app
 
 ENV PYTHONPATH="/app"
