@@ -18,13 +18,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-
 FROM python:3.9-slim
 
 RUN groupadd -g 1001 arkgroup && \
-    useradd -u 1001 -g arkgroup -m ark
-
-RUN chown -R ark:arkgroup /home/ark
+    useradd -u 1001 -g arkgroup -m ark &&\
+    chown -R ark:arkgroup /home/ark
 
 USER ark
 
