@@ -1,14 +1,14 @@
-FROM python:3.9
+FROM python:3.9-slim
 
 LABEL maintainer="Utkrist Ark"
 LABEL description="a dockerfile for ML model"
 
+WORKDIR /app
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl && \
-    apt-get clean && \
+    apt-get clean && \ 
     rm -rf /var/lib/apt/lists/* 
-
-WORKDIR /app
 
 COPY requirements.txt /app/
 
@@ -21,7 +21,7 @@ USER ark
 
 WORKDIR /app
 
-COPY app/ /app/
+COPY . /app/
 
 EXPOSE 8501
 
