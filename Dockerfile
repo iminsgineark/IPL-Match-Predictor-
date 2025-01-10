@@ -1,6 +1,5 @@
-#FROM python:3.9-slim AS app
+FROM python:3.9-slim AS app
 
-FROM python:3.9-slim
 
 LABEL maintainer="Utkrist Ark"
 LABEL description="a dockerfile for ML model"
@@ -15,6 +14,7 @@ RUN apt-get update && \
 COPY requirements.txt /app/
 
 RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install streamlit && \
     groupadd -g 10001 arkgroup && \
     useradd -u 10001 -g arkgroup -m ark && \
     chown -R ark:arkgroup /home/ark
@@ -30,13 +30,4 @@ EXPOSE 8501
 
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
 
-HEALTHCHECK CMD curl --fail http://localhost:8501/ || exit 1
-
-#FROM nginx:alpine AS mginx
-
-#COPY nginx.conf /etc/nginx/nginx.conf
-
-#EXPOSE 80
-
-#CMD ["nginx","-g","daemon off;"]
 
