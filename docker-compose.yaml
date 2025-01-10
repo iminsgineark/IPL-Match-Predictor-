@@ -1,0 +1,25 @@
+version: '3.8'
+
+networks:
+  app_network:
+    driver: bridge
+
+services:
+  streamlit:
+    build:
+      context: .
+    ports:
+      - "8501:8501"
+    networks:
+      - app_network
+
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - streamlit
+    networks:
+      - app_network
+
