@@ -1,1 +1,15 @@
 venv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.coverage
+coverage.xml
+
+.scannerwork/
+
+changes.diff
+
+*.Zone.Identifier
+
