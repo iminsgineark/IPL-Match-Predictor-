@@ -1,4 +1,4 @@
-FROM python:3.9-slim AS app
+FROM python:3.9-slim 
 
 
 LABEL maintainer="Utkrist Ark"
