@@ -1,21 +1,25 @@
 version: '3.8'
 
 networks:
-  app_network:
+  ipl-match-predictor-_app_network:
     driver: bridge
 
 services:
   streamlit:
     build:
       context: .
+      dockerfile: Dockerfile
+    image: ipl-match-predictor-streamlit
     ports:
       - "8501:8501"
     networks:
-      - app_network
+      -   ipl-match-predictor-_app_network
 
   nginx:
     build:
       context: ./nginx
+      dockerfile: Dockerfile
+    image: ipl-match-predictor--nginx
     ports:
       - "80:80"
     volumes:
@@ -23,5 +27,5 @@ services:
     depends_on:
       - streamlit
     networks:
-      - app_network
+      -   ipl-match-predictor-_app_network
 
