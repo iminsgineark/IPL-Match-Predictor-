@@ -28,4 +28,3 @@ services:
       - streamlit
     networks:
       -   ipl-match-predictor-_app_network
-
