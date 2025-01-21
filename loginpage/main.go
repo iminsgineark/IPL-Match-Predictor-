@@ -22,7 +22,7 @@ var (
 
 func main() {
 	var err error
-	client, err = mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err = mongo.NewClient(options.Client().ApplyURI("mongodb://mongodb:27017"))
 	if err != nil {
 		log.Fatal("Error creating MongoDB client:", err)
 	}
@@ -89,7 +89,7 @@ func SignupPage(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Printf("New user signup: Username - %s, Email - %s\n", username, email)
 
-		http.Redirect(w, r, "http://localhost:8501", http.StatusSeeOther)
+		http.Redirect(w, r, "http://localhost/model/", http.StatusSeeOther)
 		return
 	}
 
@@ -131,7 +131,7 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		http.Redirect(w, r, "http://localhost:8501", http.StatusSeeOther)
+		http.Redirect(w, r, "http://localhost/model/", http.StatusSeeOther)
 		return
 	}
 
@@ -144,5 +144,5 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func WelcomePage(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "http://localhost:8501", http.StatusSeeOther)
+	http.Redirect(w, r, "http://localhost/model/", http.StatusSeeOther)
 }
