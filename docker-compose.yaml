@@ -5,7 +5,7 @@ networks:
     driver: bridge
 
 services:
-  go-app:
+  go_app:
     build:
       context: ./loginpage
       dockerfile: Dockerfile
@@ -39,7 +39,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      - go-app
+      - go_app
       - streamlit
     networks:
       - ipl-match-predictor-app-network
