@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -22,7 +21,7 @@ var (
 
 func main() {
 	var err error
-	client, err = mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err = mongo.NewClient(options.Client().ApplyURI("mongodb://mongodb:27017"))
 	if err != nil {
 		log.Fatal("Error creating MongoDB client:", err)
 	}
@@ -43,8 +42,22 @@ func main() {
 	http.HandleFunc("/signup", SignupPage)
 	http.HandleFunc("/welcome", WelcomePage)
 
-	fmt.Println("Server started on http://localhost:8080")
+	fmt.Println("Server started on http://0.0.0.0:8080")
 	http.ListenAndServe(":8080", nil)
+}
+
+func renderTemplate(w http.ResponseWriter, templateFile string, data interface{}) {
+	tmpl, err := template.ParseFiles(templateFile)
+	if err != nil {
+		http.Error(w, "Error rendering template: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, data)
+}
+
+func handleErrorResponse(w http.ResponseWriter, message string, statusCode int) {
+	http.Error(w, message, statusCode)
+	log.Println(message)
 }
 
 func SignupPage(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +68,7 @@ func SignupPage(w http.ResponseWriter, r *http.Request) {
 		confirmPassword := r.FormValue("confirm_password")
 
 		if password != confirmPassword {
-			fmt.Fprintf(w, "Passwords do not match. Please try again.")
+			handleErrorResponse(w, "Passwords do not match. Please try again.", http.StatusBadRequest)
 			return
 		}
 
@@ -65,14 +78,13 @@ func SignupPage(w http.ResponseWriter, r *http.Request) {
 		var existingUser bson.M
 		err := userColl.FindOne(ctx, bson.M{"username": username}).Decode(&existingUser)
 		if err == nil {
-			fmt.Fprintf(w, "Username already exists. Please choose another username.")
+			handleErrorResponse(w, "Username already exists. Please choose another username.", http.StatusConflict)
 			return
 		}
 
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
-			http.Error(w, "Failed to hash password.", http.StatusInternalServerError)
-			log.Println("Error hashing password:", err)
+			handleErrorResponse(w, "Failed to hash password.", http.StatusInternalServerError)
 			return
 		}
 
@@ -82,23 +94,16 @@ func SignupPage(w http.ResponseWriter, r *http.Request) {
 			"password": string(hashedPassword),
 		})
 		if err != nil {
-			http.Error(w, "Failed to save user data.", http.StatusInternalServerError)
-			log.Println("Error inserting user:", err)
+			handleErrorResponse(w, "Failed to save user data.", http.StatusInternalServerError)
 			return
 		}
 
-		fmt.Printf("New user signup: Username - %s, Email - %s\n", username, email)
-
-		http.Redirect(w, r, "http://localhost:8501", http.StatusSeeOther)
+		log.Printf("New user signup: Username - %s, Email - %s\n", username, email)
+		http.Redirect(w, r, "/model/", http.StatusSeeOther)
 		return
 	}
 
-	tmpl, err := template.ParseFiles("templates/signup.html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	tmpl.Execute(w, nil)
+	renderTemplate(w, "templates/signup.html", nil)
 }
 
 func LoginPage(w http.ResponseWriter, r *http.Request) {
@@ -112,37 +117,24 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 		var user bson.M
 		err := userColl.FindOne(ctx, bson.M{"username": username}).Decode(&user)
 		if err != nil {
-			fmt.Fprintf(w, "Invalid username or password. Please try again.")
+			handleErrorResponse(w, "Invalid username or password. Please try again.", http.StatusUnauthorized)
 			return
 		}
 
 		storedPassword := user["password"].(string)
-
-		if strings.HasPrefix(storedPassword, "$2a$") || strings.HasPrefix(storedPassword, "$2b$") || strings.HasPrefix(storedPassword, "$2y$") {
-			err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(password))
-			if err != nil {
-				fmt.Fprintf(w, "Invalid username or password. Please try again.")
-				return
-			}
-		} else {
-			if storedPassword != password {
-				fmt.Fprintf(w, "Invalid username or password. Please try again.")
-				return
-			}
+		err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(password))
+		if err != nil {
+			handleErrorResponse(w, "Invalid username or password. Please try again.", http.StatusUnauthorized)
+			return
 		}
 
-		http.Redirect(w, r, "http://localhost:8501", http.StatusSeeOther)
+		http.Redirect(w, r, "/model/", http.StatusSeeOther)
 		return
 	}
 
-	tmpl, err := template.ParseFiles("templates/login.html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	tmpl.Execute(w, nil)
+	renderTemplate(w, "templates/login.html", nil)
 }
 
 func WelcomePage(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "http://localhost:8501", http.StatusSeeOther)
+	http.Redirect(w, r, "/model/", http.StatusSeeOther)
 }
