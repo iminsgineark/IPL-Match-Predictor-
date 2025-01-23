@@ -1,4 +1,7 @@
-FROM golang:1.23 AS builder
+FROM golang:1.23-alpine AS builder
+
+LABEL maintainer="Utkrist Ark"
+Label description="Dockerfile for go login app"
 
 WORKDIR /app
 
