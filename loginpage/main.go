@@ -99,7 +99,7 @@ func SignupPage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Printf("New user signup: Username - %s, Email - %s\n", username, email)
-		http.Redirect(w, r, "/model/", http.StatusSeeOther)
+		http.Redirect(w, r, "/model", http.StatusSeeOther)
 		return
 	}
 
@@ -128,7 +128,7 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/model/", http.StatusSeeOther)
+		http.Redirect(w, r, "/model", http.StatusSeeOther)
 		return
 	}
 
