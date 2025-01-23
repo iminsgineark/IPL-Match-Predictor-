@@ -40,7 +40,7 @@ func main() {
 	http.HandleFunc("/", LoginPage)
 	http.HandleFunc("/login", LoginPage)
 	http.HandleFunc("/signup", SignupPage)
-	http.HandleFunc("/welcome", WelcomePage)
+	http.HandleFunc("/model/", model)
 
 	fmt.Println("Server started on http://0.0.0.0:8080")
 	http.ListenAndServe(":8080", nil)
@@ -135,6 +135,6 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "templates/login.html", nil)
 }
 
-func WelcomePage(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/model/", http.StatusSeeOther)
+func model(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Welcome to the model page!"))
 }
