@@ -37,6 +37,7 @@ services:
     ports:
       - "80:80"
     volumes:
+      - ./loginpage/static:/app/static  
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - go_app
