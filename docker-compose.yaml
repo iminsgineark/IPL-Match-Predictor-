@@ -12,6 +12,9 @@ services:
     image: ipl-match-predictor-go
     ports:
       - "8080:8080"
+    volumes:
+      - ./loginpage/templates:/app/templates
+      - ./loginpage/static:/app/static
     environment:
       - MONGO_URI=mongodb://mongodb:27017
     depends_on:
