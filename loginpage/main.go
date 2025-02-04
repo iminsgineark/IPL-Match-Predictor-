@@ -6,8 +6,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -35,49 +33,24 @@ func main() {
 	if err != nil {
 		log.Fatal("Error connecting to MongoDB:", err)
 	}
-	defer func() {
-		if err = client.Disconnect(ctx); err != nil {
-			log.Fatal("Error disconnecting MongoDB:", err)
-		}
-	}()
 
 	userColl = client.Database("authDB").Collection("users")
 	fmt.Println("Connected to MongoDB!")
 
-	// Serve static files (CSS, images, etc.)
-	fs := http.FileServer(http.Dir("static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	// Handlers for login and signup pages
 	http.HandleFunc("/", LoginPage)
 	http.HandleFunc("/login", LoginPage)
 	http.HandleFunc("/signup", SignupPage)
 	http.HandleFunc("/model/", model)
 
-	server := &http.Server{Addr: ":8080"}
-	go func() {
-		fmt.Println("Server started on http://0.0.0.0:8080")
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Server failed: %v", err)
-		}
-	}()
-
-	// Graceful shutdown
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
-	<-stop
-
-	fmt.Println("\nShutting down server...")
-	ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelShutdown()
-	if err := server.Shutdown(ctxShutdown); err != nil {
-		log.Fatalf("Server shutdown failed: %v", err)
-	}
-	fmt.Println("Server exited gracefully.")
+	port := ":8080"
+	fmt.Printf("Server started on http://0.0.0.0%s\n", port)
+	log.Fatal(http.ListenAndServe(port, nil))
 }
 
 func renderTemplate(w http.ResponseWriter, templateFile string, data interface{}) {
-	tmpl, err := template.ParseFiles("/app/templates/" + templateFile) // Corrected path
+	tmpl, err := template.ParseFiles("/app/templates/" + templateFile)
 	if err != nil {
 		handleErrorResponse(w, "Error rendering template: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -90,7 +63,7 @@ func renderTemplate(w http.ResponseWriter, templateFile string, data interface{}
 
 func handleErrorResponse(w http.ResponseWriter, message string, statusCode int) {
 	http.Error(w, message, statusCode)
-	log.Println("Error:", message)
+	log.Println(message)
 }
 
 func SignupPage(w http.ResponseWriter, r *http.Request) {
@@ -101,7 +74,7 @@ func SignupPage(w http.ResponseWriter, r *http.Request) {
 		confirmPassword := r.FormValue("confirm_password")
 
 		if password != confirmPassword {
-			handleErrorResponse(w, "Passwords do not match.", http.StatusBadRequest)
+			handleErrorResponse(w, "Passwords do not match. Please try again.", http.StatusBadRequest)
 			return
 		}
 
@@ -111,7 +84,10 @@ func SignupPage(w http.ResponseWriter, r *http.Request) {
 		var existingUser bson.M
 		err := userColl.FindOne(ctx, bson.M{"username": username}).Decode(&existingUser)
 		if err == nil {
-			handleErrorResponse(w, "Username already exists. Please choose another.", http.StatusConflict)
+			handleErrorResponse(w, "Username already exists. Please choose another username.", http.StatusConflict)
+			return
+		} else if err != mongo.ErrNoDocuments {
+			handleErrorResponse(w, "Error checking for existing username.", http.StatusInternalServerError)
 			return
 		}
 
@@ -132,7 +108,7 @@ func SignupPage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Printf("New user signup: Username - %s, Email - %s\n", username, email)
-		http.Redirect(w, r, "/model", http.StatusSeeOther)
+		http.Redirect(w, r, "/model/", http.StatusSeeOther)
 		return
 	}
 
@@ -150,18 +126,18 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 		var user bson.M
 		err := userColl.FindOne(ctx, bson.M{"username": username}).Decode(&user)
 		if err != nil {
-			handleErrorResponse(w, "Invalid username or password.", http.StatusUnauthorized)
+			handleErrorResponse(w, "Invalid username or password. Please try again.", http.StatusUnauthorized)
 			return
 		}
 
 		storedPassword := user["password"].(string)
 		err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(password))
 		if err != nil {
-			handleErrorResponse(w, "Invalid username or password.", http.StatusUnauthorized)
+			handleErrorResponse(w, "Invalid username or password. Please try again.", http.StatusUnauthorized)
 			return
 		}
 
-		http.Redirect(w, r, "/model", http.StatusSeeOther)
+		http.Redirect(w, r, "/model/", http.StatusSeeOther)
 		return
 	}
 
