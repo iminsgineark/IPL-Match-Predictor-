@@ -1,93 +1,86 @@
-/* General Styles */
 body {
-    font-family: 'Roboto', sans-serif;
-    background-image: url('/static/7042424.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    color: #333;
+    font-family: Arial, sans-serif;
     margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    padding: 0;
+    background-color: #f9f9f9;
 }
 
-/* Login Container */
-.login-container {
-    background-color: rgba(255, 255, 255, 0.9); 
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    text-align: center;
+/* Shared container style for both signup and login pages */
+.container {
     width: 100%;
     max-width: 400px;
-    box-sizing: border-box;
+    margin: 50px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
-/* Headings */
-.login-container h2 {
+.container h2 {
     font-size: 24px;
     margin-bottom: 10px;
-    color: #4CAF50;
+    color: #333;
 }
 
-/* Form Labels */
-.login-container label {
+.container p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.container label {
     display: block;
     text-align: left;
-    margin: 10px 0 5px;
+    margin-bottom: 5px;
     font-weight: bold;
+    color: #333;
 }
 
-/* Input Fields */
-.login-container input[type="text"],
-.login-container input[type="password"] {
+.container input {
     width: 100%;
-    padding: 12px 15px;
-    margin: 5px 0 15px;
+    padding: 10px;
+    margin-bottom: 15px;
     border: 1px solid #ccc;
-    border-radius: 8px;
-    box-sizing: border-box;
+    border-radius: 5px;
     font-size: 14px;
 }
 
-/* Button */
-.login-container button {
+.container button {
     width: 100%;
-    padding: 12px 20px;
-    font-size: 16px;
-    background-color: #4CAF50;
-    color: white;
+    padding: 10px;
+    background-color: #007bff;
     border: none;
-    border-radius: 8px;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
-.login-container button:hover {
-    background-color: #45a049;
+.container button:hover {
+    background-color: #0056b3;
 }
 
-/* Signup Link */
-.signup-link {
-    margin-top: 15px;
+.container .link {
     font-size: 14px;
+    color: #007bff;
 }
 
-.signup-link a {
-    color: #4CAF50;
+.container .link a {
     text-decoration: none;
-    font-weight: bold;
+    color: #0056b3;
 }
 
-.signup-link a:hover {
+.container .link a:hover {
     text-decoration: underline;
 }
 
-/* Responsive Design */
-@media (max-width: 480px) {
-    .login-container {
-        padding: 20px;
-    }
+/* Specific styles for the signup container */
+.signup-container {
+    margin-top: 50px;
+}
+
+/* Specific styles for the login container */
+.login-container {
+    margin-top: 100px;
 }
